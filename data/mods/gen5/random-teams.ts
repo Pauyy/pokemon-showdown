@@ -1009,7 +1009,7 @@ export class RandomGen5Teams extends RandomGen6Teams {
 		// Random shininess
 		const shiny = this.randomChance(1, 1024);
 
-		const setData = setList[(Math.random() * 1000) % setList.length];
+		const setData = this.sample(setList);
 
 		setData.species = species.name;
 

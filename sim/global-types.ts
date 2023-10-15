@@ -528,6 +528,18 @@ namespace RandomTeamsTypes {
 		resistances: {[k: string]: number};
 		gigantamax?: boolean;
 	}
+	export interface SubwayTeamDetails {
+		forceResult?: boolean;
+		weather?: string;
+		typeCount?: {[k: string]: number};
+		typeComboCount?: {[k: string]: number};
+		baseFormes?: {[k: string]: number};
+		has: {[k: string]: number};
+		weaknesses: {[k: string]: number};
+		resistances: {[k: string]: number};
+		choiceItems?: number;
+		hazard?: number;
+	}
 	export interface RandomSet {
 		name: string;
 		species: string;
@@ -561,6 +573,18 @@ namespace RandomTeamsTypes {
 		moves: string[];
 		dynamaxLevel?: number;
 		gigantamax?: boolean;
+	}
+	export interface RandomSubwaySet {
+		name: string;
+		species: string;
+		gender: string;
+		item: string;
+		ability: string;
+		shiny: boolean;
+		evs: SparseStatsTable;
+		ivs: SparseStatsTable;
+		nature: string;
+		moves: string[];
 	}
 	export interface RandomSetData {
 		role: Role;

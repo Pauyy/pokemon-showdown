@@ -882,7 +882,7 @@ export class RandomGen5Teams extends RandomGen6Teams {
 			if (this.gen === 5 && !isMonotype && !this.forceMonotype && tierCount[tier] >= 2 * limitFactor) continue;
 
 			const set = this.randomSet(species, teamDetails, pokemon.length === 0);
-
+			console.log(set);
 			const types = species.types;
 			let typeCombo = types.slice().sort().join();
 
@@ -976,6 +976,98 @@ export class RandomGen5Teams extends RandomGen6Teams {
 		if (pokemon.length < this.maxTeamSize && pokemon.length < 12) {
 			throw new Error(`Could not build a random team for ${this.format} (seed=${seed})`);
 		}
+
+		return pokemon;
+	}
+
+	randomSubwaySets: {[species: string]: {sets: RandomTeamsTypes.RandomSubwaySet[]}} = require('./subway-sets.json');
+
+	randomSubwaySet(
+		species: string | Species,
+		teamData: RandomTeamsTypes.SubwayTeamDetails,
+		isLead = false
+	): RandomTeamsTypes.RandomSubwaySet {
+		species = this.dex.species.get(species);
+		const id = toID(species);
+		let forme = species.name;
+		//todo check form		
+
+		const setList = this.randomSubwaySets[id].sets;
+
+		const itemsMax: {[k: string]: number} = {choicespecs: 1, choiceband: 1, choicescarf: 1};
+		const movesMax: {[k: string]: number} = {
+			rapidspin: 1, batonpass: 1, stealthrock: 1, defog: 1, spikes: 1, toxicspikes: 1,
+		};
+
+		let effectivePool: {set: RandomTeamsTypes.RandomSubwaySet}[] = [];
+
+		
+		// Random legal ability
+		const abilities = Object.values(species.abilities).filter(a => this.dex.abilities.get(a).gen <= this.gen);
+		const ability: string = this.sample(abilities);
+	
+		// Random shininess
+		const shiny = this.randomChance(1, 1024);
+
+		const setData = setList[(Math.random() * 1000) % setList.length];
+
+		setData.species = species.name;
+
+		const moves: string[] = [];
+		for (const [i, moveSlot] of setData.moves.entries()) {	
+			moves.push(moveSlot);
+		}
+
+		return {
+			name: setData.name || species.baseSpecies,
+			species: setData.species,
+			gender: setData.gender || species.gender || (this.randomChance(1, 2) ? 'M' : 'F'),
+			item: setData.item || '',
+			ability: ability,
+			shiny: shiny,
+			evs: setData.evs || {hp: 84, atk: 84, def: 84, spa: 84, spd: 84, spe: 84},
+			ivs: setData.ivs || {hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31},
+			nature: setData.nature || 'Serious',
+			moves: moves,
+		};
+	}	
+
+	randomSubwayTeam(side: PlayerOptions, depth = 0): RandomTeamsTypes.RandomSubwaySet[]{
+		this.enforceNoDirectCustomBanlistChanges();
+
+		const forceResult = (depth >= 12);
+
+		const pokemon = [];
+
+		const pokemonPool = Object.keys(this.randomSubwaySets);
+
+		const teamData: RandomTeamsTypes.SubwayTeamDetails = {
+			typeCount: {},
+			has: {}, 
+			weaknesses: {},
+			resistances: {}
+		}
+
+		while(pokemonPool.length && pokemon.length < 3 /*maxTeamSize*/){
+			const species = this.dex.species.get(this.sampleNoReplace(pokemonPool));
+			if (!species.exists) continue;
+
+			// Limit to one of each species (Species Clause)
+			//if (teamData.baseFormes[species.baseSpecies]) continue;
+
+			const set = this.randomSubwaySet(species, teamData);
+			
+			if (!set) continue;
+
+			pokemon.push(set);
+
+			//Update TeamData
+
+
+		}
+		if (pokemon.length < 3 /*this.maxTeamSize*/) return this.randomSubwayTeam(side, ++depth);
+		
+		//Quality controll?
 
 		return pokemon;
 	}
